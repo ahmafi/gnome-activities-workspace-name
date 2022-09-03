@@ -38,6 +38,10 @@ var ActivitiesButton = GObject.registerClass(
 
       this.name = 'panelActivities';
 
+      this._wmSettings = new Gio.Settings({
+        schema: 'org.gnome.desktop.wm.preferences',
+      });
+
       const activeWorkspaceName = this._getActiveWorkspaceName();
 
       this._label = new St.Label({
@@ -45,15 +49,17 @@ var ActivitiesButton = GObject.registerClass(
         y_align: Clutter.ActorAlign.CENTER,
       });
       this.add_actor(this._label);
+      this.label_actor = this._label;
 
       this._activeWsChanged = global.workspace_manager.connect(
         'active-workspace-changed',
-        () => {
-          this._label.set_text(this._getActiveWorkspaceName());
-        }
+        this._setText.bind(this)
       );
 
-      this.label_actor = this._label;
+      this._workspaceNamesChanged = this._wmSettings.connect(
+        'changed::workspace-names',
+        this._setText.bind(this)
+      );
 
       Main.overview.connect('showing', () => {
         this.add_style_pseudo_class('overview');
@@ -68,22 +74,22 @@ var ActivitiesButton = GObject.registerClass(
     }
 
     _getWorkspaceNames() {
-      const wmPref = new Gio.Settings({
-        schema: 'org.gnome.desktop.wm.preferences',
-      });
-      const workspaceNames = wmPref.get_strv('workspace-names');
-
+      const workspaceNames = this._wmSettings.get_strv('workspace-names');
       return workspaceNames;
+    }
+
+    _setText() {
+      this._label.set_text(this._getActiveWorkspaceName());
     }
 
     _getActiveWorkspaceName() {
       const workspaceNames = this._getWorkspaceNames();
       const activeWorkspaceIndex =
         global.workspace_manager.get_active_workspace_index();
-      return (
+      const workspaceNameOrIndex =
         workspaceNames[activeWorkspaceIndex] ||
-        (activeWorkspaceIndex + 1).toString()
-      );
+        (activeWorkspaceIndex + 1).toString();
+      return workspaceNameOrIndex;
     }
 
     handleDragOver(source, _actor, _x, _y, _time) {
@@ -161,6 +167,12 @@ var ActivitiesButton = GObject.registerClass(
         global.workspace_manager.disconnect(this._activeWsChanged);
         this._activeWsChanged = null;
       }
+
+      if (this._workspaceNamesChanged) {
+        this._wmSettings.disconnect(this._workspaceNamesChanged);
+        this._workspaceNamesChanged = null;
+      }
+
       super.destroy();
     }
   }
