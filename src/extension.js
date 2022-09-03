@@ -80,7 +80,10 @@ var ActivitiesButton = GObject.registerClass(
       const workspaceNames = this._getWorkspaceNames();
       const activeWorkspaceIndex =
         global.workspace_manager.get_active_workspace_index();
-      return workspaceNames[activeWorkspaceIndex] || activeWorkspaceIndex;
+      return (
+        workspaceNames[activeWorkspaceIndex] ||
+        (activeWorkspaceIndex + 1).toString()
+      );
     }
 
     handleDragOver(source, _actor, _x, _y, _time) {
