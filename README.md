@@ -6,13 +6,13 @@
   </a>
 </div>
 
+![GNOME Extension - Activities Workspace Name Screenshot](https://github.com/ahmafi/gnome-activities-workspace-name/raw/main/images/gnome-activities-workspace-name.png)
+
 To set the workspace names use the following command:
 
 ```
 gsettings set org.gnome.desktop.wm.preferences workspace-names "['workspace1', 'workspace2', 'workspace3']"
 ```
-
-![GNOME Extension - Activities Workspace Name Screenshot](https://github.com/ahmafi/gnome-activities-workspace-name/raw/main/images/gnome-activities-workspace-name.png)
 
 # Installation
 
