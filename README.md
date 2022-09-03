@@ -1,7 +1,7 @@
 <div align="center">
   <h1>GNOME Extension - Activities Workspace Name</h1>
   <p><b>Replace Activities Text with Current Workspace Name</b></p>
-  <a href="https://extensions.gnome.org">
+  <a href="https://extensions.gnome.org/extension/5311/activities-workspace-name/">
     <img src="https://img.shields.io/badge/Install%20from-extensions.gnome.org-4A86CF?style=for-the-badge&logo=Gnome&logoColor=white"/>
   </a>
 </div>
@@ -18,7 +18,7 @@ gsettings set org.gnome.desktop.wm.preferences workspace-names "['workspace1', '
 
 ## Recommended
 
-Install from [GNOME Shell Extensions](https://extensions.gnome.org) website to get the latest version.
+Install from [GNOME Shell Extensions](https://extensions.gnome.org/extension/5311/activities-workspace-name/) website to get the latest version.
 
 ## Manual
 
