@@ -6,7 +6,7 @@
   </a>
 </div>
 
-![GNOME Extension - Activities Workspace Name Screenshot](https://github.com/ahmafi/gnome-activities-workspace-name/raw/main/images/gnome-activities-workspace-name.png)
+![GNOME Extension - Activities Workspace Name Screenshot](https://github.com/ahmafi/gnome-activities-workspace-name/raw/main/images/gnome-activities-workspace-name.jpg)
 
 To set the workspace names use the following command:
 
