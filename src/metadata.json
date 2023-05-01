@@ -2,7 +2,7 @@
   "name": "Activities Workspace Name",
   "description": "Replace Activities Text with Current Workspace Name",
   "uuid": "activitiesworkspacename@ahmafi.ir",
-  "shell-version": ["42", "43"],
+  "shell-version": ["42", "43", "44"],
   "url": "https://github.com/ahmafi/gnome-activities-workspace-name",
   "version": 2
 }
