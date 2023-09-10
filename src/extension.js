@@ -20,13 +20,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-const { main: Main, panelMenu: PanelMenu, dnd: DND } = imports.ui;
+const { main: Main, panelMenu: PanelMenu, dnd: DND, dialog: Dialog, modalDialog: ModalDialog } = imports.ui;
 const { Atk, GObject, Clutter, St, GLib, Gio } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 var BUTTON_DND_ACTIVATION_TIMEOUT = 250;
+var LONG_PRESS_RENAME_ACTIVATION_TIMEOUT = 1000;
 
 // The ActivitiesButton is a modified copy of gnome-shell ActivitiesButton
 // that can be found in https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/main/js/ui/panel.js
@@ -92,6 +93,14 @@ var ActivitiesButton = GObject.registerClass(
       return workspaceNameOrIndex;
     }
 
+    _setActiveWorkspaceName(name) {
+      const workspaceNames = this._getWorkspaceNames();
+      const activeWorkspaceIndex =
+        global.workspace_manager.get_active_workspace_index();
+      workspaceNames[activeWorkspaceIndex] = name;
+      this._wmSettings.set_strv('workspace-names', workspaceNames);
+    }
+
     handleDragOver(source, _actor, _x, _y, _time) {
       if (source != Main.xdndHandler) return DND.DragMotionResult.CONTINUE;
 
@@ -116,6 +125,7 @@ var ActivitiesButton = GObject.registerClass(
         event.type() == Clutter.EventType.BUTTON_PRESS ||
         event.type() == Clutter.EventType.TOUCH_BEGIN
       ) {
+        this.startTime = Date.now();
         if (!Main.overview.shouldToggleByCornerOrButton())
           return Clutter.EVENT_STOP;
       }
@@ -127,8 +137,51 @@ var ActivitiesButton = GObject.registerClass(
         event.type() == Clutter.EventType.TOUCH_END ||
         event.type() == Clutter.EventType.BUTTON_RELEASE
       ) {
-        if (Main.overview.shouldToggleByCornerOrButton())
+        const durationMillis = Date.now() - this.startTime;
+        if (durationMillis >= LONG_PRESS_RENAME_ACTIVATION_TIMEOUT) {
+          // long press detected, creating a modal dialog to rename workspace
+          let testDialog = new ModalDialog.ModalDialog({
+            destroyOnClose: false,
+            styleClass: 'my-dialog',
+          });
+
+          const messageLayout = new Dialog.MessageDialogContent({
+            title: 'Rename workspace',
+            description: 'Change the current workspace name to:',
+          });
+          testDialog.contentLayout.add_child(messageLayout);
+          
+          let worskapceNameEntry = new St.Entry({
+            name: 'workspaceNameEntry',
+            style_class: 'big_text',
+            can_focus: true,
+            hint_text: this._getActiveWorkspaceName(),
+            track_hover: true,
+            x_expand: true,
+          });
+          testDialog.contentLayout.add_child(worskapceNameEntry);
+
+          // create buttons
+          testDialog.setButtons([
+            {
+                label: 'Rename',
+                isDefault: true,
+                action: () => {
+                  // change name to whatever user provided...
+                  this._setActiveWorkspaceName(worskapceNameEntry.get_text());
+                  testDialog.destroy();
+                },
+            },
+            {
+                label: 'Cancel',
+                // do nothing
+                action: () => testDialog.destroy(),
+            },
+          ]);
+          testDialog.open(global.get_current_time());
+        } else if (Main.overview.shouldToggleByCornerOrButton()) {
           Main.overview.toggle();
+        }
       }
 
       return Clutter.EVENT_PROPAGATE;
