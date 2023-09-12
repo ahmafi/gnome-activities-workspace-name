@@ -8,7 +8,12 @@
 
 ![GNOME Extension - Activities Workspace Name Screenshot](https://github.com/ahmafi/gnome-activities-workspace-name/raw/main/images/gnome-activities-workspace-name.jpg)
 
-To set the workspace names use the following command:
+To set the workspace names do one of the followings:
+
+1- After installing the extension do a long press on activities name, then you
+can edit the current workspace name through the showing dialog.
+
+2- Manually through command line:
 
 ```
 gsettings set org.gnome.desktop.wm.preferences workspace-names "['workspace1', 'workspace2', 'workspace3']"
