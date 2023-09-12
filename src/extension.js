@@ -252,6 +252,11 @@ var ActivitiesButton = GObject.registerClass(
         this._workspaceNamesChanged = null;
       }
 
+      if (this._longPressTimeOut != 0) {
+        GLib.source_remove(this._longPressTimeOut);
+        this._longPressTimeOut = 0;
+      }
+
       super.destroy();
     }
   }
