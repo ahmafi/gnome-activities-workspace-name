@@ -43,10 +43,10 @@ var ActivitiesButton = GObject.registerClass(
       super._init(0.0, null, true);
       this.accessible_role = Atk.Role.TOGGLE_BUTTON;
 
-      this.name = 'panelActivities';
+      this.name = "panelActivities";
 
       this._wmSettings = new Gio.Settings({
-        schema: 'org.gnome.desktop.wm.preferences',
+        schema: "org.gnome.desktop.wm.preferences",
       });
 
       const activeWorkspaceName = this._getActiveWorkspaceName();
@@ -59,21 +59,21 @@ var ActivitiesButton = GObject.registerClass(
       this.label_actor = this._label;
 
       this._activeWsChanged = global.workspace_manager.connect(
-        'active-workspace-changed',
-        this._setText.bind(this)
+        "active-workspace-changed",
+        this._setText.bind(this),
       );
 
       this._workspaceNamesChanged = this._wmSettings.connect(
-        'changed::workspace-names',
-        this._setText.bind(this)
+        "changed::workspace-names",
+        this._setText.bind(this),
       );
 
-      Main.overview.connect('showing', () => {
-        this.add_style_pseudo_class('overview');
+      Main.overview.connect("showing", () => {
+        this.add_style_pseudo_class("overview");
         this.add_accessible_state(Atk.StateType.CHECKED);
       });
-      Main.overview.connect('hiding', () => {
-        this.remove_style_pseudo_class('overview');
+      Main.overview.connect("hiding", () => {
+        this.remove_style_pseudo_class("overview");
         this.remove_accessible_state(Atk.StateType.CHECKED);
       });
 
@@ -82,7 +82,7 @@ var ActivitiesButton = GObject.registerClass(
     }
 
     _getWorkspaceNames() {
-      const workspaceNames = this._wmSettings.get_strv('workspace-names');
+      const workspaceNames = this._wmSettings.get_strv("workspace-names");
       return workspaceNames;
     }
 
@@ -105,24 +105,24 @@ var ActivitiesButton = GObject.registerClass(
       const activeWorkspaceIndex =
         global.workspace_manager.get_active_workspace_index();
       for (let i = 0; i < activeWorkspaceIndex; i++) {
-        workspaceNames[i] = workspaceNames[i] ?? '';
+        workspaceNames[i] = workspaceNames[i] ?? "";
       }
       workspaceNames[activeWorkspaceIndex] = name;
-      this._wmSettings.set_strv('workspace-names', workspaceNames);
+      this._wmSettings.set_strv("workspace-names", workspaceNames);
     }
 
     _showWorkspaceRenameDialog() {
       const workspaceRenameDialog = new ModalDialog.ModalDialog();
 
       const messageLayout = new Dialog.MessageDialogContent({
-        title: 'Rename workspace',
-        description: 'Change the current workspace name to:',
+        title: "Rename workspace",
+        description: "Change the current workspace name to:",
       });
       workspaceRenameDialog.contentLayout.add_child(messageLayout);
 
       const workspaceNameEntry = new St.Entry({
-        name: 'workspaceNameEntry',
-        style_class: 'big_text',
+        name: "workspaceNameEntry",
+        style_class: "big_text",
         can_focus: true,
         hint_text: this._getActiveWorkspaceName(),
         track_hover: true,
@@ -134,7 +134,7 @@ var ActivitiesButton = GObject.registerClass(
       // create buttons
       workspaceRenameDialog.setButtons([
         {
-          label: 'Rename',
+          label: "Rename",
           action: () => {
             // change name to whatever user provided...
             this._setActiveWorkspaceName(workspaceNameEntry.get_text());
@@ -142,7 +142,7 @@ var ActivitiesButton = GObject.registerClass(
           },
         },
         {
-          label: 'Cancel',
+          label: "Cancel",
           key: Clutter.KEY_Escape,
           // do nothing
           action: () => workspaceRenameDialog.destroy(),
@@ -160,12 +160,14 @@ var ActivitiesButton = GObject.registerClass(
         GLib.PRIORITY_DEFAULT,
         BUTTON_DND_ACTIVATION_TIMEOUT,
         () => {
+          this._xdndTimeOut = 0;
           this._xdndToggleOverview();
-        }
+          return GLib.SOURCE_REMOVE;
+        },
       );
       GLib.Source.set_name_by_id(
         this._xdndTimeOut,
-        '[gnome-shell] this._xdndToggleOverview'
+        "[gnome-shell] this._xdndToggleOverview",
       );
 
       return DND.DragMotionResult.CONTINUE;
@@ -185,8 +187,10 @@ var ActivitiesButton = GObject.registerClass(
           GLib.PRIORITY_DEFAULT,
           LONG_PRESS_RENAME_ACTIVATION_TIMEOUT,
           () => {
+            this._longPressTimeOut = 0;
             this._showWorkspaceRenameDialog();
-          }
+            return GLib.SOURCE_REMOVE;
+          },
         );
 
         if (!Main.overview.shouldToggleByCornerOrButton())
@@ -230,15 +234,13 @@ var ActivitiesButton = GObject.registerClass(
       let pickedActor = global.stage.get_actor_at_pos(
         Clutter.PickMode.REACTIVE,
         x,
-        y
+        y,
       );
 
       if (pickedActor == this && Main.overview.shouldToggleByCornerOrButton())
         Main.overview.toggle();
 
       GLib.source_remove(this._xdndTimeOut);
-      this._xdndTimeOut = 0;
-      return GLib.SOURCE_REMOVE;
     }
 
     destroy() {
@@ -264,7 +266,7 @@ var ActivitiesButton = GObject.registerClass(
 
       super.destroy();
     }
-  }
+  },
 );
 
 let activitiesButton, uuid;
@@ -276,7 +278,7 @@ function init(extensionMeta) {
 function enable() {
   Main.panel.statusArea.activities.container.hide();
   activitiesButton = new ActivitiesButton();
-  Main.panel.addToStatusArea(uuid, activitiesButton, 0, 'left');
+  Main.panel.addToStatusArea(uuid, activitiesButton, 0, "left");
 }
 
 function disable() {
@@ -285,7 +287,7 @@ function disable() {
     activitiesButton = null;
   }
 
-  if (Main.sessionMode.currentMode == 'unlock-dialog') {
+  if (Main.sessionMode.currentMode == "unlock-dialog") {
     Main.panel.statusArea.activities.container.hide();
   } else {
     Main.panel.statusArea.activities.container.show();
